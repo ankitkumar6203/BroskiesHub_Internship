@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #444;
+      margin-top: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f1f3f5;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 4px solid #007bff;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    input, textarea, button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+  <div class="container">
+    <!-- Task List -->
+    <h2>Tasks</h2>
+    <ul id="task-list"></ul>
+
+    <!-- Add Task Form -->
+    <h2>Add Task</h2>
+    <form id="task-form">
+      <input type="text" id="title" placeholder="Enter task title" required>
+      <textarea id="description" placeholder="Enter task description"></textarea>
+      <button type="submit">Add Task</button>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/tasks"; // Your Spring Boot API
+
+    // Fetch and render tasks
+    async function fetchTasks() {
+      try {
+        const response = await fetch(API_URL);
+        const tasks = await response.json();
+
+        const list = document.getElementById("task-list");
+        list.innerHTML = "";
+
+        tasks.forEach(task => {
+          const li = document.createElement("li");
+          li.textContent = `${task.title} - ${task.description}`;
+          list.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    }
+
+    // Handle Add Task form
+    document.getElementById("task-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description })
+        });
+
+        e.target.reset(); // clear form
+        fetchTasks();     // refresh list
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
+    });
+
+    // Load tasks on page load
+    fetchTasks();
+  </script>
+</body>
+</html>
